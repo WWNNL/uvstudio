@@ -768,6 +768,7 @@ window.UVSTUDIO_LOCALES.zh = {
   "memSelectRow": "选择信道 {0}",
   "memSelectAll": "全选显示的信道",
   "memSelected": "已选择 {0} 个",
+  "memShowMore": "显示更多",
   "memMoveUp": "上移",
   "memMoveDown": "下移",
   "memInsert": "在上方插入空信道",

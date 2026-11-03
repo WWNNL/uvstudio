@@ -768,6 +768,7 @@ window.UVSTUDIO_LOCALES.pl = {
   "memSelectRow": "Zaznacz kanał {0}",
   "memSelectAll": "Zaznacz wszystkie widoczne",
   "memSelected": "Zaznaczone: {0}",
+  "memShowMore": "Pokaż więcej",
   "memMoveUp": "W górę",
   "memMoveDown": "W dół",
   "memInsert": "Wstaw pusty powyżej",

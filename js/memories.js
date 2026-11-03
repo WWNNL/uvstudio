@@ -1138,12 +1138,50 @@
       `<button type="button" class="btn mem-col-btn" data-remove-column="${escapeHtml(c)}" title="${escapeHtml(t('memRemoveColumn', c))}" aria-label="${escapeHtml(t('memRemoveColumn', c))}">✕</button></th>`).join(''));
   }
 
+  const RENDER_CHUNK = 120;
+  let pendingRows = [];
+  let moreObserver = null;
+
+  function removeMoreRow() {
+    body.querySelector('tr.mem-more-row')?.remove();
+  }
+
+  function ensureMoreRow() {
+    removeMoreRow();
+    if (!pendingRows.length) return;
+    const tr = document.createElement('tr');
+    tr.className = 'mem-more-row';
+    tr.innerHTML = `<td colspan="19" class="mem-more-cell"><button type="button" class="btn mem-more-btn">${
+      escapeHtml(t('memShowMore'))} (${pendingRows.length})</button></td>`;
+    body.appendChild(tr);
+    const button = tr.querySelector('button');
+    button.addEventListener('click', appendNextChunk);
+    if (typeof IntersectionObserver === 'function') {
+      moreObserver?.disconnect();
+      moreObserver = new IntersectionObserver(entries => {
+        if (entries.some(entry => entry.isIntersecting)) appendNextChunk();
+      }, { rootMargin: '800px' });
+      moreObserver.observe(tr);
+    }
+  }
+
+  function appendNextChunk() {
+    moreObserver?.disconnect();
+    removeMoreRow();
+    if (!pendingRows.length) return;
+    const chunk = pendingRows.splice(0, RENDER_CHUNK);
+    body.insertAdjacentHTML('beforeend', chunk.join(''));
+    markDuplicates();
+    ensureMoreRow();
+  }
+
   function render() {
     renderListNames();
     renderNoteHeaders();
     const rows = [];
+    let shown = [];
     if (image) {
-      const shown = [];
+      shown = [];
       for (let i = 0; i < M.CHANNEL_COUNT; i++) {
         if (showEmpty.checked || !M.isEmpty(image, i)) shown.push(i);
       }
@@ -1162,8 +1200,13 @@
       }
       shown.forEach(i => rows.push(rowHtml(i)));
     }
-    body.innerHTML = rows.join('');
+    shownIndices = shown;
+    pendingRows = rows;
+    moreObserver?.disconnect();
+    body.innerHTML = '';
+    appendNextChunk();
     vfoBody.innerHTML = image ? Array.from({ length: M.VFO_COUNT }, (_, v) => vfoRowHtml(M.CHANNEL_COUNT + v)).join('') : '';
+    if (!image) removeMoreRow();
     vfoBox.hidden = !image;
     channelsBox.hidden = !image;
     selectionBar.hidden = !image || selected.size === 0;
@@ -1283,8 +1326,11 @@
   });
 
   // ---------- Selection and table editing ----------
+  // Every index currently listed (filtered + sorted).  The table renders these in
+  // chunks, so the DOM only holds a slice of them at a time.
+  let shownIndices = [];
   function visibleIndices() {
-    return Array.from(body.querySelectorAll('tr[data-index]'), tr => Number(tr.dataset.index));
+    return shownIndices.slice();
   }
 
   function updateSelection() {

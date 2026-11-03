@@ -768,6 +768,7 @@ window.UVSTUDIO_LOCALES.ru = {
   "memSelectRow": "Выбрать канал {0}",
   "memSelectAll": "Выбрать все показанные",
   "memSelected": "Выбрано: {0}",
+  "memShowMore": "Показать ещё",
   "memMoveUp": "Вверх",
   "memMoveDown": "Вниз",
   "memInsert": "Вставить пустой выше",

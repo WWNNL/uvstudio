@@ -768,6 +768,7 @@ window.UVSTUDIO_LOCALES.es = {
   "memSelectRow": "Seleccionar canal {0}",
   "memSelectAll": "Seleccionar todos los visibles",
   "memSelected": "{0} seleccionados",
+  "memShowMore": "Mostrar más",
   "memMoveUp": "Subir",
   "memMoveDown": "Bajar",
   "memInsert": "Insertar vacío encima",

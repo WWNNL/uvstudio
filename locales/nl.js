@@ -768,6 +768,7 @@ window.UVSTUDIO_LOCALES.nl = {
   "memSelectRow": "Kanaal {0} selecteren",
   "memSelectAll": "Alle getoonde selecteren",
   "memSelected": "{0} geselecteerd",
+  "memShowMore": "Meer tonen",
   "memMoveUp": "Omhoog",
   "memMoveDown": "Omlaag",
   "memInsert": "Leeg erboven invoegen",

@@ -6,6 +6,9 @@
 - UTF-8 channel names: encode/decode up to 15 bytes (five Chinese characters), keep ASCII
   names unchanged, and fix the CSV import warning and the name input width.
 - Share links can pin a language with `?lang=xx`.
+- Channel table renders in 120-row chunks instead of all 1024 rows at once, so typing
+  a name no longer waits on ~39k form controls; the rest follows on scroll (or the
+  "show more" row). Select-all and bulk edits still cover every listed channel.
 
 # Changelog
 

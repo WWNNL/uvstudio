@@ -768,6 +768,7 @@ window.UVSTUDIO_LOCALES.en = {
   "memSelectRow": "Select channel {0}",
   "memSelectAll": "Select all shown",
   "memSelected": "{0} selected",
+  "memShowMore": "Show more",
   "memMoveUp": "Move up",
   "memMoveDown": "Move down",
   "memInsert": "Insert empty above",

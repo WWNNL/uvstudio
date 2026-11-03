@@ -2000,6 +2000,16 @@ display: none !important;
   top: 0;
   z-index: 1;
 }
+
+/* Rows are rendered in chunks; this row pulls the next chunk in on scroll. */
+#pane-tools .mem-table tr.mem-more-row td.mem-more-cell {
+  padding: 10px 6px;
+  text-align: center;
+  background: var(--surface-2, var(--surface));
+}
+#pane-tools .mem-table tr.mem-more-row .mem-more-btn {
+  min-width: 200px;
+}
 #pane-tools .mem-table td {
   padding: 4px 6px;
 }
