@@ -386,6 +386,7 @@ window.UVSTUDIO_LOCALES.zh = {
   "cnFontsHelp": "使用说明",
   "cnFontsDescription": "把两套中文字库写入电台外部 SPI Flash：界面字库写入 0x162000，信道名字库写入 0x180000。每个 4 KiB 扇区会先擦除，再按 128 字节分片写入，并逐字节读回校验。需要带外部 Flash 读写功能的 Labs 或 FusionRW 固件。",
   "cnFontsCheck": "从电台读取字库状态",
+  "cnFontsSummary": "{0} · {1} 个字形 · {2} B · {3}",
   "cnFontsUiAtlas": "界面字库 (0x162000)",
   "cnFontsNameAtlas": "信道名字库 (0x180000)",
   "cnFontsUiFile": "界面字库文件 (cn_font.bin)",

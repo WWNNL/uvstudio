@@ -386,6 +386,7 @@ window.UVSTUDIO_LOCALES.fr = {
   "cnFontsHelp": "How this page works",
   "cnFontsDescription": "Writes the two Chinese glyph atlases into the radio external SPI flash: the UI atlas at 0x162000 and the channel-name atlas at 0x180000. Each 4 KiB sector is erased, written in 128 B chunks and read back for verification. Requires Labs or FusionRW firmware with external-flash access.",
   "cnFontsCheck": "Read atlas status from radio",
+  "cnFontsSummary": "{0} · {1} glyphes · {2} B · {3}",
   "cnFontsUiAtlas": "UI atlas (0x162000)",
   "cnFontsNameAtlas": "Channel-name atlas (0x180000)",
   "cnFontsUiFile": "Main atlas file (cn_font.bin)",

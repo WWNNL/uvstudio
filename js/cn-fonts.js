@@ -248,8 +248,11 @@ if (typeof document !== 'undefined' && typeof window !== 'undefined') {
 
     function summarize(atlas) {
       if (!atlas) return '—';
-      return `${atlas.kind === 'ui' ? 'FCN1' : 'FCN2'} · ${atlas.count} glyphs · ${atlas.bytes.toLocaleString()} B · ` +
-        `${C.baseForKind(atlas.kind).toString(16).toUpperCase().padStart(8, '0')}h`;
+      return t('cnFontsSummary',
+        atlas.kind === 'ui' ? 'FCN1' : 'FCN2',
+        atlas.count.toLocaleString(),
+        atlas.bytes.toLocaleString(),
+        `${C.baseForKind(atlas.kind).toString(16).toUpperCase().padStart(8, '0')}h`);
     }
 
     function refresh() {
