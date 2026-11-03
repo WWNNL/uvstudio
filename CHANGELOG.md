@@ -1,3 +1,12 @@
+## Unreleased — Chinese firmware add-on
+
+- Chinese Atlases panel: validate and flash `cn_font.bin` (FCN1, `0x162000`) and
+  `name_font.bin` (FCN2, `0x180000`) to the radio's external SPI flash, with per-sector
+  read-back verification and CRC32 checks.
+- UTF-8 channel names: encode/decode up to 15 bytes (five Chinese characters), keep ASCII
+  names unchanged, and fix the CSV import warning and the name input width.
+- Share links can pin a language with `?lang=xx`.
+
 # Changelog
 
 What UV Studio+ changed, newest first. Upstream UV Studio changes are only listed

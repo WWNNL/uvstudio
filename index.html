@@ -163,6 +163,10 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
                 <span class="nav-item-label" data-i18n="studio_nav_logo">Boot Logo</span>
             </button>
+            <button class="nav-item" data-route="cn-fonts" data-app="tools" data-tool-view="cn-fonts" data-name="Chinese Atlases" data-section-i18n="studio_nav_cn_fonts">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h7v14H4z"/><path d="M13 5h7v14h-7z"/><path d="M7.5 9h.01M7.5 13h.01M16.5 9h.01M16.5 13h.01"/></svg>
+                <span class="nav-item-label" data-i18n="studio_nav_cn_fonts">Chinese Atlases</span>
+            </button>
             <button class="nav-item" data-route="export-rf-log" data-app="tools" data-tool-view="rf-log" data-name="Export RF Log" data-section-i18n="studio_nav_export_rf_log">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
                 <span class="nav-item-label" data-i18n="studio_nav_export_rf_log">Export RF Log</span>
@@ -690,6 +694,41 @@
                 </section>
                 <button id="flashRestoreBtn" disabled aria-live="polite">Restore external flash</button>
               </div>
+            </div>
+
+            <div class="tool-view" id="cn-fonts-content" role="region" hidden>
+                <p class="tab-help tab-help-top"><span class="i18n-text" data-i18n="cnFontsHelp">How this page works</span></p>
+                <section class="section">
+                    <p class="tab-description" data-i18n="cnFontsDescription">Writes the two Chinese glyph atlases into the radio external SPI flash: the UI atlas at 0x162000 and the channel-name atlas at 0x180000. Each 4 KiB sector is erased, written in 128 B chunks and read back for verification.</p>
+                </section>
+                <section class="section">
+                    <div class="output-actions">
+                        <button id="cnFontsCheckBtn" type="button" data-i18n="cnFontsCheck">Read atlas status from radio</button>
+                    </div>
+                    <p class="tab-description"><span data-i18n="cnFontsUiAtlas">UI atlas (0x162000)</span>: <span id="cnFontsUiSummary">&#8212;</span></p>
+                    <p class="tab-description"><span data-i18n="cnFontsNameAtlas">Channel-name atlas (0x180000)</span>: <span id="cnFontsNameSummary">&#8212;</span></p>
+                </section>
+                <section class="section" aria-labelledby="labelCnFontsUiFile">
+                    <label id="labelCnFontsUiFile" for="cnFontsUiFile" data-i18n="cnFontsUiFile">Main atlas file (cn_font.bin)</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="cnFontsUiFile" accept=".bin" />
+                        <div class="file-input-label" id="cnFontsUiFileLabel">
+                            <span class="file-name" id="cnFontsUiFileName" data-i18n="fileNoFile">No file selected</span>
+                            <span class="file-button" data-i18n="fileChoose">Choose file</span>
+                        </div>
+                    </div>
+                </section>
+                <section class="section" aria-labelledby="labelCnFontsNameFile">
+                    <label id="labelCnFontsNameFile" for="cnFontsNameFile" data-i18n="cnFontsNameFile">Channel-name atlas file (name_font.bin)</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="cnFontsNameFile" accept=".bin" />
+                        <div class="file-input-label" id="cnFontsNameFileLabel">
+                            <span class="file-name" id="cnFontsNameFileName" data-i18n="fileNoFile">No file selected</span>
+                            <span class="file-button" data-i18n="fileChoose">Choose file</span>
+                        </div>
+                    </div>
+                </section>
+                <button id="cnFontsWriteBtn" type="button" disabled aria-live="polite" data-i18n="cnFontsWrite">Write atlases to radio</button>
             </div>
 
             <div class="tool-view" id="factory-reset-content" role="region" hidden>
@@ -1293,6 +1332,7 @@
 <script src="js/keypad-detach.js?v=1"></script>
 <script src="js/firmware-package.js?v=1"></script>
 <script src="js/flash.js?v=108"></script>
+<script src="js/cn-fonts.js?v=1"></script>
 <script src="js/memories.js?v=22"></script>
 <script src="js/settings.js?v=12"></script>
 <script src="js/flash-catalog.js?v=20"></script>

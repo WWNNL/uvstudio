@@ -10,6 +10,29 @@ W8LBZ club, and it follows every UV Studio release.
 F4HWN doesn't support this fork: please report UV Studio+ problems here, not
 upstream. Original UV Studio: <https://armel.github.io/uvstudio/>
 
+## Chinese firmware add-on (this fork)
+
+This copy is the [F4HWN Chinese firmware](https://github.com/Rebines/uv-k1-k5v3-firmware-custom-CN)
+companion build. On top of everything UV Studio+ does it adds:
+
+- **Chinese Atlases panel** (`Chinese Atlases` in the sidebar): reads, writes and verifies the
+  two glyph atlases the Chinese firmware keeps in the radio's external SPI flash.
+  The UI atlas (`cn_font.bin`, FCN1) goes to `0x162000`, the GB2312 channel-name atlas
+  (`name_font.bin`, FCN2) to `0x180000`. Each 4 KiB sector is erased, written in 128 B chunks,
+  read back byte by byte, and checked against the sector CRC32 when the firmware supports it.
+  Both files are validated (magic, geometry, size, glyph/index CRCs) before anything is erased.
+  Requires the **Labs** or **FusionRW** build: those are the only ones with external-flash access.
+- **UTF-8 channel names**: names are stored as up to 15 UTF-8 bytes, so five Chinese characters
+  fit (the firmware reads 16 B). ASCII-only names keep their previous behaviour and are padded
+  the same way. CHIRP's own driver only reads ASCII names, so a Chinese name shows as mojibake
+  there; the radio menu's name editor is ASCII-only as well.
+- **`?lang=zh`**: pins the interface language for one page load (handy for shared links and
+  screenshots). The language selector still persists your choice as usual.
+
+Build firmware and atlases first, then flash in this order: firmware → `cn_font.bin` →
+`name_font.bin` → power-cycle the radio. The atlases are checksummed against the firmware, so a
+mismatch simply falls back to English instead of showing broken text.
+
 ## What UV Studio+ adds
 
 Everything UV Studio does (listed below) works the same here. On top of that:

@@ -24,7 +24,9 @@
   const BACKUP_SIZES = [0x8800, CHANNELS_END, IMAGE_SIZE];   // older backups lack list names / VFOs
   const LIST_NAME_BASE = 0x880E;
   const LIST_NAME_LENGTH = 3;
-  const NAME_LENGTH = 10;
+  const NAME_LENGTH = 10;       // ASCII names written by older firmware
+  const NAME_MAX_BYTES = 15;    // UTF-8 names (firmware v4.2+ reads 16 B: 5 CJK chars)
+  const NAME_FIELD_BYTES = 16;
   const EMPTY_BAND = 7;
   const SCANLIST_ALL = 25;      // SCAN_LIST_MODE_ALL: member of every list
   const SCANLIST_COUNT = 24;    // MR_CHANNELS_LIST
@@ -151,18 +153,50 @@
     return Math.floor((f + Math.floor((step + 1) / 2)) / step) * step * 10;
   }
 
+  function decodeNameBytes(bytes) {
+    if (!bytes.length) return '';
+    let ascii = true;
+    for (let i = 0; i < bytes.length; i++) {
+      if (bytes[i] >= 0x80) { ascii = false; break; }
+    }
+    let text;
+    if (ascii) {
+      text = String.fromCharCode(...bytes);
+    } else {
+      text = new TextDecoder('utf-8', { fatal: false }).decode(new Uint8Array(bytes));
+    }
+    return text.replace(/\uFFFD/g, '').replace(/[\x00-\x1F\x7F]/g, '').trimEnd();
+  }
+
+  // UTF-8 bytes for the 16-byte name field: at most NAME_MAX_BYTES, never split a
+  // multi-byte sequence, control characters dropped (a 0x00 byte ends the string).
+  function encodeNameBytes(name) {
+    const text = String(name ?? '');
+    const out = [];
+    const encoder = new TextEncoder();
+    for (const ch of text) {
+      const cp = ch.codePointAt(0);
+      if (cp < 0x20 || cp === 0x7F) continue;
+      const bytes = encoder.encode(ch);
+      if (out.length + bytes.length > NAME_MAX_BYTES) break;
+      for (const b of bytes) out.push(b);
+    }
+    return out;
+  }
+
   function decodeChannel(image, index) {
     if (isEmpty(image, index)) return null;
     const { r, a, n } = slot(index);
     const view = new DataView(image.buffer, image.byteOffset, image.byteLength);
     const modulation = image[r + 11] >> 4;
     const narrow = (image[r + 12] >> 1) & 1;
-    let name = '';
-    for (let i = 0; n !== null && i < NAME_LENGTH; i++) {
+    const nameBytes = [];
+    for (let i = 0; n !== null && i < NAME_FIELD_BYTES; i++) {
       const c = image[n + i];
       if (c === 0x00 || c === 0xFF) break;
-      name += String.fromCharCode(c);
+      nameBytes.push(c);
     }
+    const name = decodeNameBytes(nameBytes);
     return {
       name: name.trimEnd(),
       freq: view.getUint32(r, true) * 10,
@@ -231,7 +265,7 @@
     if (!(ch.compander >= 0 && ch.compander < COMPANDERS.length)) throw new Error('invalid compander');
     if (!(ch.pttId >= 0 && ch.pttId < PTT_IDS.length)) throw new Error('invalid PTT ID');
     const modeIndex = MODES.indexOf(ch.mode);
-    const name = String(ch.name ?? '').replace(/[^\x20-\x7E]/g, '').trim().slice(0, NAME_LENGTH);
+    const name = encodeNameBytes(ch.name);
 
     if (!decodeChannel(image, index)) image.fill(0, r, r + 16);   // empty slot or erased VFO record
     if (isEmpty(image, index)) image[a] = 0;
@@ -259,8 +293,8 @@
     image[a] = (image[a] & 0x60) | (ch.compander << 3) | bandOf(ch.freq) | (ch.skip ? 0x80 : 0);
     image[a + 1] = ch.scanlist;
 
-    image.fill(0, n, n + 16);
-    for (let i = 0; i < name.length; i++) image[n + i] = name.charCodeAt(i);
+    image.fill(0, n, n + NAME_FIELD_BYTES);
+    image.set(name, n);
   }
 
   function getListName(image, list) {   // list 1..24
@@ -720,7 +754,7 @@
       const stored = decodeChannel(image, p.index);   // name as the radio keeps it
       // Too long, or characters the radio's font lacks (it shows ASCII only): stripped by encodeChannel.
       if (String(p.ch.name ?? '').trim() !== stored.name) {
-        warnings.push({ line: p.line, message: `name ${stored.name ? `stored as "${stored.name}"` : 'left blank'} (the radio shows up to ${NAME_LENGTH} plain letters, digits and symbols)` });
+        warnings.push({ line: p.line, message: `name ${stored.name ? `stored as "${stored.name}"` : 'left blank'} (the radio shows up to ${NAME_MAX_BYTES} UTF-8 bytes: 5 Chinese characters, or ${NAME_LENGTH}+ ASCII characters)` });
       }
       channelWarnings(stored).forEach(w => warnings.push({ line: p.line, message: WARNING_TEXT[w.code](w) }));
       // '2 EST' names an unnamed list; a name already on the radio wins.
@@ -782,6 +816,10 @@
     BACKUP_SIZES,
     BAND_LOWER_HZ,
     LIST_NAME_LENGTH,
+    NAME_LENGTH,
+    NAME_MAX_BYTES,
+    decodeNameBytes,
+    encodeNameBytes,
     COMPANDERS,
     PTT_IDS,
     SCANLIST_ALL,
@@ -925,7 +963,7 @@
     const select = pairs => `<select ${attrs}>${options(pairs, ch[field])}</select>`;
     const check = () => `<input type="checkbox" ${attrs}${ch[field] ? ' checked' : ''}>`;
     switch (field) {
-      case 'name': return `<input ${attrs} maxlength="10" value="${escapeHtml(ch.name)}">`;
+      case 'name': return `<input ${attrs} maxlength="15" value="${escapeHtml(ch.name)}">`;
       case 'freq': case 'offset': return `<input ${attrs} inputmode="decimal" value="${M.formatMHz(ch[field])}">`;
       case 'txTone': case 'rxTone': return `<input ${attrs} list="memToneList" value="${ch[field]}">`;
       case 'duplex': return select(M.DUPLEXES.map(d => [d, d]));

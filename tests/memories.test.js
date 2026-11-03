@@ -374,10 +374,21 @@ test('flags likely mistakes and keys notes by the stored (cut) name', () => {
   const result = mem.importChirpCsv(image,
     'Location,Name,Frequency,Duplex,Offset,Mode,Comment\n1,TOWER APPROACH,121.5,,0,FM,Tower\n2,中继台,146.52,,0,FM,\n3,CAFÉ,146.55,,0,FM,\n', { notes });
   const ch = mem.decodeChannel(image, 0);
-  assert.equal(ch.name, 'TOWER APPR');
-  assert.deepEqual(result.warnings.map(w => w.message.split(' (')[0]),
-    ['name stored as "TOWER APPR"', 'airband', 'name left blank', 'name stored as "CAF"']);
+  // UTF-8 names: up to 15 bytes, so 14 ASCII characters and 5 CJK characters fit.
+  assert.equal(ch.name, 'TOWER APPROACH');
+  assert.equal(mem.decodeChannel(image, 1).name, '中继台');
+  assert.equal(mem.decodeChannel(image, 2).name, 'CAFÉ');
+  assert.deepEqual(result.warnings.map(w => w.message.split(' (')[0]), ['airband']);
   assert.equal(notes.values.get(mem.noteKey(ch)).Comment, 'Tower');
+
+  // Longer names are cut on a character boundary, never mid-sequence.
+  const wide = blank();
+  const csv2 = ['Location,Name,Frequency,Duplex,Offset,Mode,Comment',
+    '1,中继台测试信道一,146.6,,0,FM,'].join('\n');
+  const res2 = mem.importChirpCsv(wide, csv2, { mode: 'replace' });
+  assert.equal(mem.decodeChannel(wide, 0).name, '中继台测试');
+  assert.deepEqual(res2.warnings.map(w => w.message.split(' (')[0]),
+    ['name stored as "中继台测试"']);
 });
 
 test('closes gaps in channel order, keeping every byte', () => {

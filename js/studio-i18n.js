@@ -13,6 +13,13 @@
     const preferences = window.UVStudioPreferences;
 
     function readStoredLanguage() {
+        // A ?lang= parameter pins the language for this page load (shared links, screenshots).
+        try {
+            const requested = new URLSearchParams(window.location.search).get("lang");
+            if (requested && SUPPORTED_LANGUAGES.includes(requested)) return requested;
+        } catch (e) {
+            // location unavailable: fall through to the stored preference
+        }
         const keys = [STORAGE_KEY].concat(LEGACY_STORAGE_KEYS);
         for (const key of keys) {
             const value = preferences.get(key, "");

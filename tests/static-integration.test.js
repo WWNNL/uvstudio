@@ -461,7 +461,7 @@ test('exposes the responsive sidebar toggle to assistive technologies', () => {
 
 test('groups paired maintenance actions into resource views', () => {
   const views = [...html.matchAll(/data-tool-view="([^"]+)"/g)].map(match => match[1]);
-  assert.deepEqual(views, ['flash', 'slots', 'apps', 'external-flash', 'factory-reset', 'memories', 'settings', 'calibration', 'logo', 'rf-log']);
+  assert.deepEqual(views, ['flash', 'slots', 'apps', 'external-flash', 'factory-reset', 'memories', 'settings', 'calibration', 'logo', 'cn-fonts', 'rf-log']);
   views.forEach(view => assert.match(html, new RegExp(`id="${view}-content"`)));
   ['dump', 'restore', 'logo-upload', 'logo-dump', 'flash-dump', 'flash-restore'].forEach(action => {
     assert.match(html, new RegExp(`id="${action}-content"[^>]+data-action-panel=`));

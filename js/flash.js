@@ -785,6 +785,7 @@ window.UVStudioFlash = Object.freeze({
   clearAppFromCatalog: () => beginAppImageLoad('catalog'),
   hasFirmware: () => Boolean(firmwareData),
   runEepromOperation,
+  runExternalFlashOperation,
   log,
   // App submission panel: the radio connected here, its screen and firmware.
   radioConnected: () => Boolean(port && writer && toolsSerial.isOwner()),
@@ -2632,6 +2633,55 @@ async function runEepromOperation(name, critical, task) {
         log(t('rebootComplete'), 'success');
       }
     });
+    setTimeout(() => {
+      if (progressContainer) progressContainer.style.display = 'none';
+      updateProgress(0);
+    }, 800);
+    return true;
+  } catch (e) {
+    log(t('error', e?.message ?? String(e)), 'error');
+    return false;
+  } finally {
+    if (port) await disconnect();
+    endToolsOperation(operation);
+  }
+}
+
+// Generic external-flash operation (0x0738/0x073A/0x073C/0x073E) with the same
+// connect / device-info / progress / disconnect envelope as runEepromOperation().
+// Used by the Chinese atlas panel (js/cn-fonts.js): the raw external flash commands
+// exist in Labs and FusionRW builds (ENABLE_FEAT_F4HWN_EXT_FLASH_RW).
+async function runExternalFlashOperation(name, critical, task) {
+  const operation = beginToolsOperation(name, critical);
+  if (!operation) return false;
+  if (progressContainer) progressContainer.style.display = 'block';
+  updateProgress(0);
+  try {
+    if (!port || connecting) await connect();
+    readBuffer = [];
+    await sleep(1000);
+    const devInfo = await requestDeviceInfo();
+    if (devInfo.hasAesKey) throw new Error(t('memLocked'));
+    const ts = devInfo.timestamp;
+    if (!(await hasExternalFlashSupport(ts))) throw new Error(t('cnFontsUnsupported'));
+
+    let crcSupported = false;
+    try {
+      crcSupported = await detectExternalFlashCrcSupport(ts);
+    } catch {
+      crcSupported = false;
+    }
+
+    await task({
+      read: (address, length) => readExternalFlashChunk(address, length, ts),
+      erase: address => eraseExternalFlashSector(address, ts),
+      write: (address, data) => writeExternalFlashChunk(address, data, ts),
+      crc32: (address, length) => readExternalFlashCrc32(address, length, ts),
+      crcSupported,
+      progress: updateProgress,
+      log: (message, kind) => log(message, kind)
+    });
+
     setTimeout(() => {
       if (progressContainer) progressContainer.style.display = 'none';
       updateProgress(0);
